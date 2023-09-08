@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const filePath = 'C:\\Users\\Aadarsh\\request.txt';
+const filePath = './NAYAK/request.txt';
 
 fs.readFile(filePath, 'utf8', (err, data) => {
   if (err) {
