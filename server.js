@@ -1,35 +1,41 @@
-const http = require('http');
-const fs = require('fs');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-const server = http.createServer((req, res) => {
-    if (req.method === 'POST' && req.url === '/save-message') {
-        let body = '';
+const app = express();
+const port = process.env.PORT || 3000;
 
-        req.on('data', (chunk) => {
-            body += chunk.toString();
-        });
+app.use(bodyParser.json());
 
-        req.on('end', () => {
+function chatbot(message) {
+  message = message.toLowerCase();
+  if (message.includes('hello')) {
+    return 'Hello! How can I assist you?';
+  } else if (message.includes('how are you')) {
+    return "I'm just a bot, but thanks for asking!";
+  } else if (message.includes('goodbye')) {
+    return 'Goodbye! Have a great day!';
+  } else {
+    return "'I m sorry, I don't understand that question.'";
+  }
+}
 
+app.post('/', (req, res) => {
+  const { message } = req.body;
 
-            // Write the received message to a text file
-            const filePath = 'request.txt'; 
-            fs.appendFile(filePath, body + '\n', 'utf8', (err) => {
-                if (err) {
-                    console.error(`Error saving message to file: ${err}`);
-                }
-            });
+  if (message) {
+    // Process the incoming message using the chatbot function
+    const response = chatbot(message);
 
-            res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.end('Message saved to file.');
-        });
-    } else {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Not Found');
-    }
+    // Send the response back to the client
+    res.json({ message: response });
+  } else {
+    res.status(400).json({ error: 'Message is required.' });
+  }
 });
 
-const port = 3000;
-server.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+// Serve static files (HTML, CSS, etc.)
+app.use(express.static('public'));
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
